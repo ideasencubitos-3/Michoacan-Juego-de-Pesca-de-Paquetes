@@ -14,6 +14,15 @@ el lago para que los jugadores intenten pescarlo.
 - Envía el mensaje ya codificado, tal como aparece en la lista del host.
 - Le da al host el control del juego: él decide cuándo sale cada paquete.
 
+DESCARGA
+--------
+Descarga paketsender desde:
+
+   https://packetsender.com/download
+
+Cuando lo tengas, guárdalo en la misma carpeta donde está tu peces.csv, o
+indícale la ruta del archivo al ejecutarlo.
+
 ¿CÓMO SE USA EN EL JUEGO?
 -------------------------
 1. Prepara tu lista de peces en peces.csv (un pez por línea).
