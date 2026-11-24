@@ -1,0 +1,145 @@
+BASE DE DATOS DEL HOST
+======================
+
+Esta guía es para el host, aunque tenga poco conocimiento técnico. Puedes copiar
+y pegar los ejemplos, cambiando solo lo que se indica.
+
+¿PARA QUÉ SIRVE LA BASE DE DATOS?
+---------------------------------
+Aquí los jugadores registran los paquetes que van pescando. Como el host la crea
+y la controla, puede auditar con certeza qué capturó cada jugador y a qué hora.
+
+LA IDEA PRINCIPAL
+-----------------
+- Cada jugador tiene su PROPIA TABLA, idéntica a las demás (mismas columnas).
+- Cada jugador tiene su propio usuario y contraseña.
+- Cada jugador solo puede escribir y leer en SU tabla. No puede ver, cambiar ni
+  borrar los registros de otros, ni los suyos una vez guardados.
+- La hora la pone el servidor, no el jugador. Así nadie puede alterarla.
+
+ELEGIR EL NIVEL DE AISLAMIENTO
+------------------------------
+Opción A: una sola base de datos, una tabla por jugador.
+   Recomendada para grupos de nivel parecido, niñas, niños y estudiantes.
+   Es la más fácil de armar.
+
+Opción B: una base de datos separada por jugador (cada una con su tabla).
+   Recomendada cuando hay jugadores muy hábiles o competencias profesionales.
+   Así, aunque alguien intente explorar, no ve nada de los demás.
+   Además es fácil reiniciar o borrar a un jugador sin tocar al resto.
+
+PREPARACIÓN (UNA SOLA VEZ)
+--------------------------
+1. Instala un servidor de base de datos. Se recomienda MariaDB (libre y gratuito).
+   En Ubuntu/Lubuntu, por ejemplo:
+
+       sudo apt install mariadb-server
+
+2. Permite conexiones desde la red del juego. Por defecto solo acepta
+   conexiones del mismo equipo. En el archivo de configuración de MariaDB,
+   cambia la opción "bind-address" para que escuche en la red del juego, y
+   reinicia el servicio.
+3. Abre el puerto 3306 solo para la red del juego (no para internet).
+4. Entra a la consola como administrador:
+
+       sudo mariadb
+
+OPCIÓN A: UNA BASE DE DATOS, UNA TABLA POR JUGADOR
+--------------------------------------------------
+Paso 1. Crea la base de datos y la tabla PLANTILLA (la base para todos):
+
+    CREATE DATABASE michoacan;
+    USE michoacan;
+
+    CREATE TABLE plantilla_capturas (
+      id                    INT AUTO_INCREMENT PRIMARY KEY,
+      pez                   VARCHAR(50)  NOT NULL,
+      protocolo             VARCHAR(10)  NOT NULL,
+      codificacion          VARCHAR(20)  NOT NULL,
+      mensaje_decodificado  TEXT         NOT NULL,
+      hora_registro         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+    );
+
+Paso 2. Crea una tabla idéntica por cada jugador, copiando la plantilla:
+
+    CREATE TABLE capturas_jugador01 LIKE plantilla_capturas;
+    CREATE TABLE capturas_jugador02 LIKE plantilla_capturas;
+    CREATE TABLE capturas_jugador03 LIKE plantilla_capturas;
+
+    (Repite la línea cambiando el número por cada jugador.)
+
+Paso 3. Crea el usuario de cada jugador y dale permisos SOLO sobre su tabla.
+Cambia 192.168.1.% por la red de tu juego y la clave por una distinta para cada
+jugador:
+
+    CREATE USER 'jugador01'@'192.168.1.%' IDENTIFIED BY 'cambia_esta_clave_01';
+
+    GRANT SELECT ON michoacan.capturas_jugador01 TO 'jugador01'@'192.168.1.%';
+    GRANT INSERT (pez, protocolo, codificacion, mensaje_decodificado)
+          ON michoacan.capturas_jugador01 TO 'jugador01'@'192.168.1.%';
+
+    (Repite para jugador02, jugador03... con su propia tabla y clave.)
+
+¿Qué logra esto?
+- El jugador puede consultar y agregar registros en su tabla.
+- No puede modificar ni borrar registros (no tiene UPDATE ni DELETE).
+- No puede escribir la hora (solo tiene permiso sobre las otras columnas), así
+  que siempre la pone el servidor.
+- No ve las tablas de los demás.
+
+OPCIÓN B: UNA BASE DE DATOS POR JUGADOR
+---------------------------------------
+Paso 1. Crea una base de datos plantilla con la tabla base:
+
+    CREATE DATABASE michoacan_plantilla;
+
+    CREATE TABLE michoacan_plantilla.capturas (
+      id                    INT AUTO_INCREMENT PRIMARY KEY,
+      pez                   VARCHAR(50)  NOT NULL,
+      protocolo             VARCHAR(10)  NOT NULL,
+      codificacion          VARCHAR(20)  NOT NULL,
+      mensaje_decodificado  TEXT         NOT NULL,
+      hora_registro         TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+    );
+
+Paso 2. Por cada jugador, crea su base de datos y copia la tabla:
+
+    CREATE DATABASE michoacan_jugador01;
+    CREATE TABLE michoacan_jugador01.capturas LIKE michoacan_plantilla.capturas;
+
+    (Repite cambiando el número por cada jugador.)
+
+Paso 3. Crea su usuario y dale permisos solo sobre su base de datos:
+
+    CREATE USER 'jugador01'@'192.168.1.%' IDENTIFIED BY 'cambia_esta_clave_01';
+
+    GRANT SELECT ON michoacan_jugador01.capturas TO 'jugador01'@'192.168.1.%';
+    GRANT INSERT (pez, protocolo, codificacion, mensaje_decodificado)
+          ON michoacan_jugador01.capturas TO 'jugador01'@'192.168.1.%';
+
+CONSEJOS PARA EL HOST
+---------------------
+- Anota en una hoja qué usuario y qué clave le diste a cada jugador, y entrégaselas
+  junto con el script pescador.py.
+- Usa una clave distinta para cada jugador.
+- Si un jugador tiene un nivel más alto, usa la Opción B con él (o con todos).
+- Prueba con tu propio usuario de práctica antes de la partida.
+
+PARA AUDITAR AL TERMINAR
+------------------------
+Entra como administrador y revisa lo que registró cada jugador, ordenado por hora:
+
+    SELECT * FROM michoacan.capturas_jugador01 ORDER BY hora_registro;
+
+(En la Opción B: SELECT * FROM michoacan_jugador01.capturas ORDER BY hora_registro;)
+
+Compara los peces registrados, los protocolos y las horas con las reglas que
+dictaste, y asigna los lugares. Si hay empate, estará a la vista en los registros.
+
+AL FINALIZAR LA PARTIDA
+-----------------------
+Borra a los jugadores y sus accesos para que no queden abiertos:
+
+    DROP USER 'jugador01'@'192.168.1.%';
+
+Y si quieres reiniciar, borra o vacía las tablas o bases de datos de la partida.
