@@ -1,0 +1,39 @@
+PAKETSENDER
+===========
+
+¿QUÉ ES?
+--------
+Paketsender es el software del host. Lee la lista de peces (peces.csv) y
+envía cada paquete a todos los equipos de la red, como si soltara un pez en
+el lago para que los jugadores intenten pescarlo.
+
+¿PARA QUÉ SIRVE?
+----------------
+- Libera los paquetes en la red con el protocolo indicado para cada pez
+  (TCP, UDP, FTP...).
+- Envía el mensaje ya codificado, tal como aparece en la lista del host.
+- Le da al host el control del juego: él decide cuándo sale cada paquete.
+
+¿CÓMO SE USA EN EL JUEGO?
+-------------------------
+1. Prepara tu lista de peces en peces.csv (un pez por línea).
+2. Conecta tu equipo a la red del juego, la misma donde estarán los
+   jugadores.
+3. Ejecuta paketsender en tu equipo, indicándole el archivo peces.csv.
+   Ejemplo (ajústalo según cómo ejecutes tu versión):
+
+       paketsender peces.csv
+
+4. Antes de soltar cada pez, dicta las reglas a los jugadores: cómo capturarlo,
+   de qué forma viene codificado, qué protocolo usa y si debe guardarse en la
+   base de datos.
+5. Cuando todos estén listos, libera el paquete. Repite con el siguiente pez.
+
+RECOMENDACIONES
+---------------
+- Cambia los mensajes del peces.csv de ejemplo por los tuyos. Este repositorio
+  es público, así que los jugadores podrían leerlos de antemano.
+- Úsalo solo en una red acordada entre todos los participantes. Nunca lo
+  ejecutes en redes ajenas.
+- Prueba primero con un solo jugador para confirmar que el paquete llega y se
+  decodifica bien.
