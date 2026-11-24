@@ -37,7 +37,8 @@ Michoacan-Juego-de-Pesca-de-Paquetes/
 ├── README.md        ← esta guía general
 ├── host/
 │   ├── peces.csv    ← lista de paquetes codificados que el host enviará
-│   └── paketsender  ← software que envía los paquetes a toda la red
+│   ├── paketsender  ← software que envía los paquetes a toda la red
+│   └── base-de-datos/ ← creación de la BD, las tablas de los participantes y sus accesos
 ├── jugador/
 │   └── pescador.py  ← script base: captura el paquete, lo decodifica y muestra el resultado
 └── LICENSE
@@ -50,7 +51,7 @@ Las reglas son simples:
 1. El host entrega a los participantes un código muy básico de referencia (`pescador.py`).
 2. El host dicta las reglas y los tiempos de captura, porque es quien libera los paquetes en la red.
 3. Antes de liberar cada paquete, el host dicta cómo debe capturarse, de qué forma viene codificado, qué protocolo usa y si debe guardarse en una base de datos específica.
-4. Cada participante lleva una **tabla personal** donde registra los paquetes ya decodificados.
+4. El host crea la **base de datos** con una **tabla por participante** y les da acceso. Cada participante registra ahí los paquetes ya decodificados, y así el host puede auditar con total control.
 5. Al finalizar, el host analiza qué participantes cumplieron todas las reglas de captura a tiempo. Puede haber empates en los mismos lugares.
 
 ---
@@ -58,27 +59,28 @@ Las reglas son simples:
 ## Guía para el host
 
 1. **Prepara la lista de peces.** Edita `host/peces.csv` con un pez por línea: nombre, protocolo, codificación, mensaje codificado y puntos.
-2. **Define las reglas de la partida.** Duración, tiempos entre paquetes, forma de captura y si se guarda en una base de datos.
-3. **Entrega el script base** (`jugador/pescador.py`) a los participantes y confirma que todos están conectados a la misma red.
-4. **Avisa que empieza la pesca.** Antes de cada paquete, dicta las reglas de ese pez (cómo capturarlo, codificación y protocolo).
-5. **Libera los paquetes** con `paketsender`, que los envía a toda la red.
-6. **Al terminar, revisa las tablas personales** de los participantes y asigna lugares según quiénes cumplieron todas las reglas en tiempo.
+2. **Crea la base de datos y las tablas de los participantes.** Una tabla por jugador, con su propio usuario y acceso. Dale a cada uno solo los permisos necesarios (registrar y consultar su propia tabla); el host conserva el control total. Conviene que la hora de cada registro la ponga el servidor, no el jugador, para que la auditoría sea confiable.
+3. **Define las reglas de la partida.** Duración, tiempos entre paquetes, forma de captura y qué debe guardarse en la base de datos.
+4. **Entrega el script base** (`jugador/pescador.py`) y sus datos de acceso a cada participante, y confirma que todos están conectados a la misma red.
+5. **Avisa que empieza la pesca.** Antes de cada paquete, dicta las reglas de ese pez (cómo capturarlo, codificación y protocolo).
+6. **Libera los paquetes** con `paketsender`, que los envía a toda la red.
+7. **Audita al terminar.** Revisa las tablas y registros de cada participante en la base de datos, con sus horas, y asigna lugares según quiénes cumplieron todas las reglas en tiempo.
 
 ## Guía para el jugador
 
 1. **Conéctate a la red del juego** que indique el host.
-2. **Prepara el script base** (`pescador.py`) con lo que pida el host para ejecutarlo.
+2. **Prepara el script base** (`pescador.py`) con los datos de acceso que te dio el host.
 3. **Espera el aviso del host** con las reglas del siguiente pez.
 4. **Captura el paquete.** El script lo captura, lo decodifica y te muestra el resultado.
-5. **Regístralo en tu tabla personal.**
+5. **Regístralo en tu tabla de la base de datos.** Es tu tabla personal; el host puede revisarla al finalizar.
 
-Ejemplo de tabla personal:
+Ejemplo de registro:
 
-| Pez capturado | Protocolo | Codificación | Mensaje decodificado | Hora |
-|---------------|-----------|--------------|----------------------|------|
-|               |           |              |                      |      |
+| Pez capturado | Protocolo | Codificación | Mensaje decodificado | Hora (la pone el servidor) |
+|---------------|-----------|--------------|----------------------|----------------------------|
+|               |           |              |                      |                            |
 
-6. **Entrega tu tabla al host** al finalizar.
+6. **Avisa al host cuando termines.** Él audita directamente desde la base de datos.
 
 ---
 
