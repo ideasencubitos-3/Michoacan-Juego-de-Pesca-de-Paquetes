@@ -4,6 +4,11 @@
 
 > **Michoacán** significa *"lugar de pescadores"*. En este juego, la red es un lago o un río y cada paquete que capturas es un pez.
 
+## Video
+
+Mira el video que explica el juego:
+
+[Ver en YouTube](PEGA-AQUÍ-LA-URL-DEL-VIDEO)
 ---
 
 ## ¿Qué es?
